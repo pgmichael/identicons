@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const port = 3000
+const port = process.env.NODE_ENV !== 'production' ? 3000 : process.env.PORT
 const { createCanvas, loadImage } = require('canvas')
 const { generateHash, intToRGB, paint } = require('./utils')
 
