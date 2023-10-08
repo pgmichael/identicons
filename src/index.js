@@ -1,6 +1,6 @@
 const express = require('express')
 const { createCanvas, loadImage } = require('canvas')
-const { generateHash, intToRGB, paint } = require('./utils')
+const { generateHash, intToRGB, paint, lighten } = require('./utils')
 const dotenv = require('dotenv')
 
 dotenv.config()
@@ -22,19 +22,22 @@ app.get('/', (req, res) => {
 
   const seed = req.query.seed || Math.random().toString(36).substring(7)
   const hash = generateHash(seed)
-  const color = `#${intToRGB(hash)}`
+  const foregroundColor = `#${intToRGB(hash)}`
+  const backgroundColor = lighten(foregroundColor)
   const blockSize = size / 5
   const canvas = createCanvas(size, size)
   const ctx = canvas.getContext('2d')
 
   // Paint
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.fillStyle = backgroundColor
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
   for (let i = 0; i < 5; i++) {
     for (let j = 0; j < 5; j++) {
       if (i > 2) continue
 
       if (((hash >> (i * 5 + j)) & 1) === 1) {
-        ctx.fillStyle = color
+        ctx.fillStyle = foregroundColor
 
         // Generate random pattern on the left side and mirror it on the right side
         ctx.fillRect(i * blockSize, j * blockSize, blockSize, blockSize)
