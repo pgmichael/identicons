@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { createLogger, format, transports } from 'winston';
 
 // Canvas utils ---------------------------------------------------------------
 export function generateHash(str) {
@@ -28,6 +29,11 @@ export function lighten(color, factor = 175) {
 }
 
 // Logging utils ---------------------------------------------------------------
+const logger = createLogger({
+  level: 'info',
+  transports: [new transports.Console()],
+});
+
 export function loggingMiddleware(req, res, next) {
   const start = new Date();
   const startDateTime = start.toISOString();
@@ -37,29 +43,28 @@ export function loggingMiddleware(req, res, next) {
   const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
   const initialLogEntry = formatLogEntry({ method, startDateTime, clientIp, url, id });
-  console.log(JSON.stringify({
-    message: initialLogEntry,
-    id: id,
-    method: method,
-    url: url,
-    ip: clientIp,
-  }));
+  logger.info(initialLogEntry, {
+    method,
+    url,
+    id,
+    clientIp,
+    startDateTime: start.toISOString(),
+  });
 
   res.on("finish", () => {
     const timeTaken = Date.now() - start.getTime();
     const status = res.statusCode;
 
-    const finalLogEntry = formatLogEntry({ method, startDateTime, timeTaken, id, clientIp, status, url });
-    console.log({
-      id: id,
-      method: method,
-      url: url,
-      ip: clientIp,
-      status: status,
-      timeTaken: timeTaken,
+    const finalLogEntry = formatLogEntry({ method, startDateTime, timeTaken, id, clientIp, status, url })
+    logger.info(finalLogEntry, {
+      method,
+      url,
+      id,
+      clientIp,
+      status,
+      timeTaken,
     });
   });
-
 
   next();
 }
@@ -67,3 +72,4 @@ export function loggingMiddleware(req, res, next) {
 function formatLogEntry({ method, startDateTime, timeTaken = 'N/A', id = 'N/A', clientIp, status = 'N/A', url }) {
   return `${`[${method}]`.padEnd(8)} Start: ${startDateTime} | Time: ${timeTaken.toString().padEnd(8)} | ID: ${id} | Client IP: ${(clientIp || "").padEnd(15)} | Status: ${status.toString().padEnd(3)} | URL: ${url}`;
 }
+
