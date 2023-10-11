@@ -1,14 +1,19 @@
-const express = require('express')
-const { createCanvas, loadImage } = require('canvas')
-const { generateHash, intToRGB, paint, lighten } = require('./utils')
-const dotenv = require('dotenv')
+import express from 'express';
+import { createCanvas } from 'canvas';
+import { generateHash, intToRGB, lighten, loggingMiddleware } from './utils.js';
+import dotenv from 'dotenv';
 
-dotenv.config()
+// Setup ----------------------------------------
+dotenv.config();
+
 const app = express()
 const port = process.env.PORT || 3003
 
+app.use(loggingMiddleware)
+app.listen(port, console.log(`Identicons server listening on port ${port}...`))
+
+// Routes ---------------------------------------
 app.get('/', (req, res) => {
-  // Setup canvas and context
   const size = req.query.size ? parseInt(req.query.size) : 200
   if (size < 0) {
     res.status(400).send('Size must be a positive integer')
@@ -28,7 +33,6 @@ app.get('/', (req, res) => {
   const canvas = createCanvas(size, size)
   const ctx = canvas.getContext('2d')
 
-  // Paint
   ctx.fillStyle = backgroundColor
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -46,14 +50,6 @@ app.get('/', (req, res) => {
     }
   }
 
-  // Convert canvas to buffer
-  const buffer = canvas.toBuffer('image/png')
-
-  // Set content type and send the image
   res.set('Content-Type', 'image/png')
-  res.send(buffer)
-})
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  res.send(canvas.toBuffer('image/png'))
 })
