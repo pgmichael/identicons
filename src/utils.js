@@ -31,6 +31,7 @@ export function lighten(color, factor = 175) {
 // Logging utils ---------------------------------------------------------------
 const logger = createLogger({
   level: 'info',
+  format: format.json(),
   transports: [new transports.Console()],
 });
 
@@ -44,11 +45,10 @@ export function loggingMiddleware(req, res, next) {
 
   const initialLogEntry = formatLogEntry({ method, startDateTime, clientIp, url, id });
   logger.info(initialLogEntry, {
+    id,
     method,
     url,
-    id,
-    clientIp,
-    startDateTime: start.toISOString(),
+    ip: clientIp,
   });
 
   res.on("finish", () => {
@@ -57,10 +57,10 @@ export function loggingMiddleware(req, res, next) {
 
     const finalLogEntry = formatLogEntry({ method, startDateTime, timeTaken, id, clientIp, status, url })
     logger.info(finalLogEntry, {
+      id,
       method,
       url,
-      id,
-      clientIp,
+      ip: clientIp,
       status,
       timeTaken,
     });
