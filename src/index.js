@@ -1,10 +1,16 @@
-import express from 'express';
-import { createCanvas } from 'canvas';
-import { generateHash, intToRGB, lighten, loggingMiddleware } from './utils.js';
-import dotenv from 'dotenv';
+import express from 'express'
+import { createCanvas } from 'canvas'
+import {
+  generateHash,
+  intToRGB,
+  lighten,
+  getDarkThemeColors,
+  loggingMiddleware,
+} from './utils.js'
+import dotenv from 'dotenv'
 
 // Setup ----------------------------------------
-dotenv.config();
+dotenv.config()
 
 const app = express()
 const port = process.env.PORT || 3003
@@ -21,14 +27,35 @@ app.get('/', (req, res) => {
   }
 
   if (size > 1000) {
-    res.status(400).send('Size must be less than 1000 to prevent CPU exhaustion')
+    res
+      .status(400)
+      .send('Size must be less than 1000 to prevent CPU exhaustion')
+    return
+  }
+
+  if (
+    req.query.theme &&
+    req.query.theme !== 'light' &&
+    req.query.theme !== 'dark'
+  ) {
+    res.status(400).send('Theme must be either "light" or "dark"')
     return
   }
 
   const seed = req.query.seed || Math.random().toString(36).substring(7)
+  const theme = req.query.theme || 'light'
   const hash = generateHash(seed)
-  const foregroundColor = `#${intToRGB(hash)}`
-  const backgroundColor = lighten(foregroundColor)
+  let foregroundColor, backgroundColor
+
+  if (theme === 'dark') {
+    const colors = getDarkThemeColors(`#${intToRGB(hash)}`)
+    foregroundColor = colors.foreground
+    backgroundColor = colors.background
+  } else {
+    foregroundColor = `#${intToRGB(hash)}`
+    backgroundColor = lighten(foregroundColor)
+  }
+
   const blockSize = size / 5
   const canvas = createCanvas(size, size)
   const ctx = canvas.getContext('2d')

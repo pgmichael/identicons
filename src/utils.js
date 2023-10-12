@@ -28,6 +28,26 @@ export function lighten(color, factor = 175) {
     .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
 }
 
+export function getDarkThemeColors(color) {
+  let r = parseInt(color.substr(1,2), 16);
+  let g = parseInt(color.substr(3,2), 16);
+  let b = parseInt(color.substr(5,2), 16);
+
+  const backgroundR = Math.floor(r * 0.50).toString(16).padStart(2, '0');
+  const backgroundG = Math.floor(g * 0.50).toString(16).padStart(2, '0');
+  const backgroundB = Math.floor(b * 0.50).toString(16).padStart(2, '0');
+
+  const foregroundR = Math.floor(r * 0.95).toString(16).padStart(2, '0');
+  const foregroundG = Math.floor(g * 0.95).toString(16).padStart(2, '0');
+  const foregroundB = Math.floor(b * 0.95).toString(16).padStart(2, '0');
+
+  return {
+    background: `#${backgroundR}${backgroundG}${backgroundB}`,
+    foreground: `#${foregroundR}${foregroundG}${foregroundB}`,
+  };
+}
+
+
 // Logging utils ---------------------------------------------------------------
 const logger = createLogger({
   level: 'info',
