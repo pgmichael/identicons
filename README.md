@@ -1,8 +1,8 @@
 # Identicons
 
-This project is an HTTP server designed to generate and serve identicons, unique graphics that are produced based on specific user-provided parameters.
+HTTP server that generates and serves identicons.
 
-You can access the live service at [https://identicons.pgmichael.com](https://identicons.pgmichael.com).
+You can access it freely at [https://identicons.pgmichael.com](https://identicons.pgmichael.com) or host it yourself.
 
 ## Parameters
 
